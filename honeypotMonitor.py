@@ -49,7 +49,9 @@ def startLogger():
 	# define connection string attribute of logger object
 	# this uses our Azure Monitor instrumentation key
 	logger.addHandler(AzureLogHandler(
-		connection_string=instrumentation_key
+		# format:
+		# 'InstrumentationKey=<instrumentation-key-here>'
+		connection_string=instrumentation_key 
 	))
 
 	return logger
@@ -68,9 +70,7 @@ def writeAppInsights(logger,address,data):
 		'City': data.city,
 		'Country': data.country,
 		'CountryName': data.country_name,
-		'Hostname': data.hostname,
 		'Location': data.loc,
-		'Postal': data.postal,
 		'Region': data.region,
 		'Timezone': data.timezone,
 		'Details': json.dumps(data.all)
@@ -88,7 +88,7 @@ def ipData(address):
 	# ipinfo package - free up to 50k requests
 	# https://github.com/ipinfo/python
 	# login to ipinfo account: https://ipinfo.io/account?welcome=true
-	access_token = # your ipinfo access token
+	access_token = # '<your-access-token-here>'
 	# initialize handler with access token
 	handler = ipinfo.getHandler(access_token)
 	# create details object from handler search of the ip address
@@ -99,10 +99,10 @@ def ipData(address):
 
 def getInput():
 
-	host = input('IP Address: ')
+	host = '10.0.0.4' # input('IP Address: ')
 	while True:
 		try:
-			port = 23 # int(input('Port: '))
+			port = 1025 # int(input('Port: '))
 		except TypeError:
 			print('Error: Invalid port number.')
 			continue
@@ -124,7 +124,7 @@ def writeLog(client, data=''):
 ###############################################################
 def main(host, port):
 	print ('Starting honeypot!')
-	# initialize logger object
+	# initialize Azure Monitoring logger object
 	logger = startLogger()
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -135,13 +135,14 @@ def main(host, port):
 		data = ipData(address)
 		print ('Connection from:{}:{}'.format(address[0], address[1]))
 		try:
-			# insock.send('{}\n'.format(motd))
+			# python 2.7 code commented out: insock.send('{}\n'.format(motd))
 			conndata = insock.recv(1024)
 			insock.close()
 		except socket.error as e:
-			writeLog(address)
+			writeAppInsights(logger, address, data)
+			#writeLog(address)
 		else:
-			writeLog(address, conndata)
+			#writeLog(address, conndata)
 			writeAppInsights(logger, address, data)
 
         
@@ -151,7 +152,16 @@ if __name__=='__main__':
 		main(stuff[0], stuff[1])
 	except KeyboardInterrupt:
 		print('Bye!')
+		# Create an Azure Monitoring logger object
+		logger = startLogger()
+		# Call the 'warning' method of the logger object with custom dimensions.
+		logger.warning('error',extra={'custom_dimensions':{'error':'KeyboardInterrupt', 'Time':time.ctime()}})
 		exit(0)
 	except BaseException as e:
-		print('Error: {}'.format(e))
+		hp_error = 'Error: {}'.format(e)
+		print(hp_error)
+		# Create an Azure Monitoring logger object
+		logger = startLogger()
+		# Call the 'warning' method of the logger object with custom dimensions.
+		logger.warning('error',extra={'custom_dimensions':{'error':hp_error, 'Time':time.ctime()}})
 		exit(1)
