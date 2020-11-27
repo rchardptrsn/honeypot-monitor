@@ -1,0 +1,27 @@
+# Kustos Queries
+
+# These queries demonstrate some common Kustos Query Language examples. 
+
+
+# Query for IP address is not equal to me:
+
+traces
+| extend Time = tostring(customDimensions['Time']) 
+| extend IP = tostring(customDimensions['IP']) 
+| extend City = tostring(customDimensions['City']) 
+| extend Country = tostring(customDimensions['Country']) 
+| extend CountryName = tostring(customDimensions['CountryName']) 
+| extend Location = tostring(customDimensions['Location']) 
+| extend Region = tostring(customDimensions['Region']) 
+| extend Timezone = tostring(customDimensions['Timezone']) 
+| where IP != '<your-ip-address>'
+| where isnotempty(Country)
+| project Time, IP, City, Country, CountryName, Location, Region, Timezone
+
+# Query for error logs sent to Application Insights
+
+traces
+| extend ErrorMessage = tostring(customDimensions['error']) 
+| extend Time = tostring(customDimensions['Time'])
+| where isnotempty(ErrorMessage)
+| project ErrorMessage, Time
