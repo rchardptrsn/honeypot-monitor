@@ -49,9 +49,8 @@ def startLogger():
 	# define connection string attribute of logger object
 	# this uses our Azure Monitor instrumentation key
 	logger.addHandler(AzureLogHandler(
-		# format:
-		# 'InstrumentationKey=<instrumentation-key-here>'
-		connection_string=instrumentation_key 
+		# connection_string='InstrumentationKey=fd8638b6-ccd6-41f0-a273-e8b15726c4dd'
+		connection_string='InstrumentationKey=fd8638b6-ccd6-41f0-a273-e8b15726c4dd'
 	))
 
 	return logger
@@ -88,30 +87,13 @@ def ipData(address):
 	# ipinfo package - free up to 50k requests
 	# https://github.com/ipinfo/python
 	# login to ipinfo account: https://ipinfo.io/account?welcome=true
-	access_token = # '<your-access-token-here>'
+	access_token = 'a6e213eb2f8834'
 	# initialize handler with access token
 	handler = ipinfo.getHandler(access_token)
 	# create details object from handler search of the ip address
 	details = handler.getDetails(ip_address)
 
 	return details
-
-
-def getInput():
-
-	host = '10.0.0.4' # input('IP Address: ')
-	while True:
-		try:
-			port = 1025 # int(input('Port: '))
-		except TypeError:
-			print('Error: Invalid port number.')
-			continue
-		else:
-			if (port < 1) or (port > 65535):
-				print('Error: Invalid port number.')
-				continue
-			else:
-				return (host, port)
 
 
 def writeLog(client, data=''):
@@ -148,8 +130,9 @@ def main(host, port):
         
 if __name__=='__main__':
 	try:
-		stuff = getInput()
-		main(stuff[0], stuff[1])
+		host = '10.0.0.4'
+		port = 1025
+		main(host, port)
 	except KeyboardInterrupt:
 		print('Bye!')
 		# Create an Azure Monitoring logger object
