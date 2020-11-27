@@ -25,3 +25,10 @@ traces
 | extend Time = tostring(customDimensions['Time'])
 | where isnotempty(ErrorMessage)
 | project ErrorMessage, Time
+
+# Count by country
+
+traces
+| extend CountryName = tostring(customDimensions['Country']) 
+| summarize Count = count() by CountryName
+| project CountryName, Count
